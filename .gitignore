@@ -40,3 +40,6 @@ yarn-error.log*
 
 # screenshots folder
 /screenshots/
+
+# everything inside compositions directory but not the directory itself
+compositions/**
