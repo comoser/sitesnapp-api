@@ -26,8 +26,28 @@ async function takeScreenshot(
   const page = await context.newPage();
 
   await page.goto(pageUrl);
+
   // wait for animations to finish
   await page.waitForTimeout(3000);
+
+  const selector = 'a[id*=cookie i], a[class*=cookie i], button[id*=cookie i] , button[class*=cookie i]';
+  const expectedCookieAcceptText = /^(Accept|Accept all cookies|Accept all|Allow|Allow all|Allow all cookies|OK)$/gi;
+  const cookieAcceptElements = await page.locator(selector);
+  const count = await cookieAcceptElements.count();
+  for (let i = 0; i < count; i++) {
+    const cookieAcceptElement = await cookieAcceptElements.nth(i);
+    const textContent = await cookieAcceptElement.textContent();
+    if (expectedCookieAcceptText.test(textContent?.trim() ?? '')) {
+      if (await cookieAcceptElement.isVisible()) {
+        await cookieAcceptElement.click();
+        break;
+      }
+    }
+  }
+
+  // wait for banner to fade out
+  await page.waitForTimeout(2000);
+
   await page.screenshot({
     path: `screenshots/${getNameFromUrl(pageUrl)}-${deviceName}.png`,
   });
